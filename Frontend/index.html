@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinVoice Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #09161d, #0f2a3d);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        h1 {
+            font-size: 3em;
+            color: gold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px gold, 0 0 20px gold;
+            animation: glow 2s infinite alternate;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #ddd;
+            margin-bottom: 40px;
+        }
+
+        a button {
+            background: linear-gradient(45deg, #2563eb, #00c6ff);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            font-size: 1.1em;
+            margin: 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        a button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #00c6ff, #2563eb);
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .forgot {
+            margin-top: 20px;
+            display: block;
+            color: #ccc;
+            font-size: 0.95em;
+            transition: color 0.3s;
+        }
+
+        .forgot:hover {
+            color: #fff;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-30px);}
+            100% { opacity: 1; transform: translateY(0);}
+        }
+
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px gold, 0 0 10px gold;}
+            100% { text-shadow: 0 0 20px gold, 0 0 40px gold;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💡 Welcome to FinVoice</h1>
+        <p>Your personal financial advisor and spending tracker.</p>
+        <div>
+            <a href="/login.html"><button>Login</button></a>
+            <a href="/register.html"><button>Register</button></a>
+        </div>
+        <a href="/forgot.html" class="forgot">Forgot Password?</a>
+    </div>
+</body>
+</html>

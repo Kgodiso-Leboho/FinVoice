@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Savings Goal - FinVoice</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0b1a22;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .assistant-container {
+      background: #09161d;
+      padding: 20px;
+      border-radius: 15px;
+      width: 350px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      border: #ffffff solid 2px;
+
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      text-decoration: none;
+      color: #007bff;
+    }
+    .main-box {
+      text-align: center;
+    }
+    input {
+      width: 80%;
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      padding: 8px 15px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #09161d;
+        color: white;
+        font-weight: bold;
+    }
+    .setgoal {
+      background: #09161d;
+    }
+    button.reset {
+      background: gold;
+    }
+  </style>
+</head>
+<body>
+  <div class="assistant-container">
+    <div class="header">
+      <span>Savings Goal</span>
+      <a href="index.html" class="back-btn">⬅ Back</a>
+    </div>
+    <div class="main-box">
+      <h2>Your Goal</h2>
+
+      <!-- Goal Input -->
+      <div id="goal-section">
+        <input type="number" id="goalInput" placeholder="Enter your goal amount">
+        <button class="setgoal" onclick="setGoal()">Set Goal</button>
+      </div>
+
+      <!-- Goal Display (hidden until goal is set) -->
+      <div id="goalDisplay" style="display:none;">
+        <h3 style="color:#007bff; margin-bottom:10px;">🎯 Your Savings Goal</h3>
+        <p id="goalText" style="font-size:18px; font-weight:bold; color:#333;"></p>
+        <p id="savedText" style="font-size:16px; color:#28a745; margin:5px 0;">Saved so far: R0</p>
+        <p id="progressText" style="font-size:16px; color:#555; margin:5px 0;">Progress: 0%</p>
+
+        <!-- Progress Bar -->
+        <div style="background:#e0e0e0; border-radius:20px; overflow:hidden; height:20px; width:80%; margin:15px auto;">
+          <div id="progressBar" style="height:100%; width:0%; background:linear-gradient(90deg, #007bff, #00c851); transition:width 0.5s;"></div>
+        </div>
+
+        <button class="reset" onclick="resetGoal()">🔄 Reset Goal</button>
+      </div>
+
+      <!-- Monthly Savings -->
+      <div id="savingsSection" style="display:none;">
+        <input type="number" id="savingsInput" placeholder="Enter monthly savings">
+        <button onclick="addSavings()">Add Savings</button>
+      </div>
+      <div id="advice" class="advice-box">Loading advice...</div>
+    </div>
+  </div>
+
+  <script>
+    let targetGoal = 0;
+    let savedSoFar = 0;
+    let balance = parseFloat(localStorage.getItem("balance")) || 1000;
+
+    function setGoal() {
+      targetGoal = parseFloat(document.getElementById("goalInput").value);
+      if (!targetGoal || targetGoal <= 0) {
+        alert("Please enter a valid goal amount.");
+        return;
+      }
+      document.getElementById("goal-section").style.display = "none";
+      document.getElementById("goalDisplay").style.display = "block";
+      document.getElementById("savingsSection").style.display = "block";
+      document.getElementById("goalText").innerText = "Target: R" + targetGoal;
+    }
+
+    function addSavings() {
+      const value = parseFloat(document.getElementById("savingsInput").value);
+      if (!value || value <= 0) { alert("Enter valid savings amount."); return; }
+      if (value > balance) { alert("Cannot save more than available balance."); return; }
+
+      savedSoFar += value;
+      balance -= value;
+      localStorage.setItem("balance", balance);
+
+      document.getElementById("savedText").innerText = "Saved so far: R" + savedSoFar;
+      const progress = ((savedSoFar / targetGoal) * 100).toFixed(2);
+      document.getElementById("progressText").innerText = "Progress: " + progress + "%";
+      document.getElementById("progressBar").style.width = progress + "%";
+      document.getElementById("savingsInput").value = "";
+    }
+
+    function resetGoal() {
+      targetGoal = 0;
+      savedSoFar = 0;
+      document.getElementById("goal-section").style.display = "block";
+      document.getElementById("goalDisplay").style.display = "none";
+      document.getElementById("savingsSection").style.display = "none";
+      document.getElementById("goalInput").value = "";
+    }
+
+    // ----------------- Fetch savings advice from FastAPI -----------------
+    async function fetchSavingsAdvice() {
+      const userData = {
+        income: 2000,
+        expenses: 1200,
+        savings: 500,
+        debt: 100,
+        age: 30,
+        dependents: 1,
+        risk_profile: "medium",
+        context: "savings"
+      };
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/get-advice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(userData)
+        });
+
+        const data = await response.json();
+        const adviceDiv = document.getElementById("advice");
+        adviceDiv.innerHTML = "<strong>Advice:</strong><br>";
+        data.financial_advice.forEach((a, i) => {
+          adviceDiv.innerHTML += `${i+1}. ${a}<br>`;
+        });
+        if (data.trust_advice.length > 0) {
+          adviceDiv.innerHTML += "<br><strong>Trust Advice:</strong><br>";
+          data.trust_advice.forEach((a, i) => {
+            adviceDiv.innerHTML += `${i+1}. ${a}<br>`;
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById("advice").innerText = "Failed to load advice.";
+      }
+    }
+
+    fetchSavingsAdvice();
+  </script>
+</body>
+</html>

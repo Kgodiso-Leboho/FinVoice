@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check Balance - FinVoice</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0b1a22;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .assistant-container {
+      background: #09161d;
+      padding: 20px;
+      border-radius: 15px;
+      width: 350px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+        border: #ffffff solid 2px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .back-btn {
+      text-decoration: none;
+      color: #007bff;
+    }
+    .big-text {
+      font-size: 32px;
+      font-weight: bold;
+      color: #28a745;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="assistant-container">
+    <div class="header">
+      <span>Check Balance</span>
+      <a href="index.html" class="back-btn">⬅ Back</a>
+    </div>
+    <div class="main-box">
+      <h2>Your Balance</h2>
+      <p id="balance" class="big-text">R0</p>
+      <div id="advice" class="advice-box">
+        Loading advice...
+      </div>
+    </div>
+  </div>
+    <script>
+        async function fetchBalanceAdvice() {
+            // Example user data; ideally you get this from your app or localStorage
+            const userData = {
+                income: 2000,
+                expenses: 1200,
+                savings: 500,
+                debt: 100,
+                age: 30,
+                dependents: 1,
+                risk_profile: "medium",
+                context: "balance"
+            };
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/get-advice", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData)
+                });
+
+                const data = await response.json();
+
+                // Display balance
+                const disposable = userData.income - userData.expenses - userData.debt;
+                document.getElementById("balance").innerText = "R " + disposable;
+
+                // Display advice
+                const adviceDiv = document.getElementById("advice");
+                adviceDiv.innerHTML = "<strong>Advice:</strong><br>";
+                data.financial_advice.forEach((a, i) => {
+                adviceDiv.innerHTML += `${i+1}. ${a}<br>`;
+                });
+                if (data.trust_advice.length > 0) {
+                adviceDiv.innerHTML += "<br><strong>Trust Advice:</strong><br>";
+                data.trust_advice.forEach((a, i) => {
+                    adviceDiv.innerHTML += `${i+1}. ${a}<br>`;
+                });
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById("advice").innerText = "Failed to load advice.";
+            }
+        }
+
+        // Fetch advice when page loads
+        fetchBalanceAdvice();
+    </script>
+</body>
+</html>

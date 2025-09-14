@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinVoice Assistant</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="assistant--container">
+    <div class="header">
+      <span>FinVoice Assistant</span>
+      <div class="toggle"></div>
+    </div>
+
+    <div class="main-box"></div>
+
+    <div class="input-box">
+      <input type="text" placeholder="Ask me something...">
+      <button class="mic-btn">🎤</button>
+      <button class="send-btn">▶</button>
+    </div>
+
+    <div class="info-section">
+      <div class="balance-box">
+        <strong>Balance</strong><br>
+        <span class="big-text">$1,000</span>
+      </div>
+      <div class="expense-box">
+        <strong>Expense</strong><br>
+        Today: $50<br>
+        This month: $500
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="actions">
+        <a href="balance.html"><button>Check Balance</button></a>
+        <a href="summary.html"><button>Spending Summary</button></a>
+        <a href="bills.html"><button>Upcoming Bills</button></a>
+        <a href="savings.html"><button>Savings Goal</button></a>
+      </div>
+    </div>
+
+    <div class="footer">Built by ByteBusters 2025</div>
+  </div>
+  <script>
+    const chatBox = document.getElementById("chatBox");
+    const userInput = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const micBtn = document.getElementById("micBtn");
+
+    function appendMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender === "user" ? "user-msg" : "bot-msg");
+      msg.innerText = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function getAdviceFromBackend(context) {
+      // Example user data; in practice, fetch dynamically or from localStorage
+      const userData = {
+        income: 2000,
+        expenses: 1200,
+        savings: 500,
+        debt: 100,
+        age: 30,
+        dependents: 1,
+        risk_profile: "medium",
+        context: context
+      };
+
+      const response = await fetch("http://127.0.0.1:8000/get-advice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData)
+      });
+      const data = await response.json();
+      return data;
+    }
+
+    sendBtn.addEventListener("click", async () => {
+      const text = userInput.value.trim();
+      if (!text) return;
+
+      appendMessage(text, "user");
+      userInput.value = "";
+
+      // Determine context from user input
+      let context = "dashboard";
+      if (text.toLowerCase().includes("balance")) context = "balance";
+      else if (text.toLowerCase().includes("spending")) context = "spending";
+      else if (text.toLowerCase().includes("bills")) context = "bills";
+      else if (text.toLowerCase().includes("savings")) context = "savings";
+
+      const advice = await getAdviceFromBackend(context);
+
+      let response = "Financial Advice:\n";
+      advice.financial_advice.forEach((a,i) => response += `${i+1}. ${a}\n`);
+      response += "\nTrust Advice:\n";
+      advice.trust_advice.forEach((a,i) => response += `${i+1}. ${a}\n`);
+
+      appendMessage(response, "bot");
+    });
+
+    userInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+
+    micBtn.addEventListener("click", () => {
+      appendMessage("🎤 Listening... (voice input not yet implemented)", "bot");
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>FinVoice Assistant</h1>
+    <div class="input-container">
+        <form action="/login" method="post">
+            <div class="header">
+                <h2>USER LOGIN</h2>
+            </div>
+
+            <div class="email">
+                <i class="fa-solid fa-envelope"></i>
+                <input type="text"  placeholder="| Email address" id="username" name="username" required>
+            </div>
+
+            <div class="password">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" placeholder="| Password" id="password" name="password" required>
+            </div>
+
+            <div class="button">
+                <button type="button" id="loginBtn">LOG IN</button>
+            </div>
+
+            <div id="msg" style="margin-top: 10px; font-weight: bold;"></div>
+
+
+            <div class="forgot">
+                 <a href="forgotpassword.html">Forgot Password?</a>
+            </div>
+
+
+            <div class="register-link">
+                <p>Don't have an account? <a href="/register.html">Register here</a></p>
+            </div>
+        </form>
+        
+    </div>
+    <script>
+        const loginBtn = document.getElementById("loginBtn");
+        const username = document.getElementById("username");
+        const password = document.getElementById("password");
+        const msg = document.getElementById("msg");
+
+        loginBtn.addEventListener("click", () => {
+            const email = username.value.trim();
+            const pwd = password.value.trim();
+
+            if (!email || !pwd) {
+                msg.style.color = "red";
+                msg.innerText = "Please enter email and password.";
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem("users")) || [];
+            const user = users.find(u => u.email === email && u.password === pwd);
+
+            if (user) {
+                localStorage.setItem("currentUser", email);
+                msg.style.color = "green";
+                msg.innerText = "Login successful! Redirecting...";
+                setTimeout(() => window.location.href = "dashboard.html", 1000);
+            } else {
+                msg.style.color = "red";
+                msg.innerText = "Invalid email or password.";
+            }
+        });
+    </script>
+</body>
+</html>

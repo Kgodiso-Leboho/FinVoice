@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Financial Advisor</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    }
+
+    h1{
+        color: gold;
+    }
+
+    .card {
+    background: #09161d;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    width: 920px;
+    max-width: 100%;
+    }
+
+    .row {
+    display: flex;
+    gap: 20px;
+    }
+
+    .col {
+    flex: 1;
+    }
+
+    label {
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 6px;
+    color: white;
+    }
+
+    input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    }
+
+    button {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    }
+
+    .result {
+    margin-top: 12px;
+    background: #fafafa;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    }
+
+    ul {
+    margin: 6px 0 0 18px;
+    }
+
+    h1 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    }
+
+    canvas {
+    max-width: 100%;
+    }
+
+    .center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+
+  </style>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="card">
+    <h1>💡 Financial Advisor</h1>
+
+    <div class="row">
+      <div class="col" style="max-width:420px;">
+        <form id="financeForm">
+          <label for="income">Monthly Income (R)</label>
+          <input id="income" type="number" min="0" step="0.01" required placeholder="e.g. 10000" />
+
+          <label for="expenses" style="margin-top:12px;">Monthly Expenses (R)</label>
+          <input id="expenses" type="number" min="0" step="0.01" required placeholder="e.g. 7000" />
+
+          <div style="margin-top:12px;">
+            <button type="submit">Get Recommendation</button>
+          </div>
+        </form>
+
+        <div id="output" class="result" style="display:none;">
+          <p><strong>Savings:</strong> R<span id="savingsNum">0</span> (<span id="savingsPct">0%</span>)</p>
+          <div id="adviceList"></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="center">
+          <canvas id="comparisonChart" width="400" height="300"></canvas>
+        </div>
+        <p style="font-size:12px; color:#666; margin-top:8px;">
+          Chart compares your Expenses vs Savings and shows the South African benchmark.
+        </p>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // South African benchmark (approx values) - these are example percentages
+  const SA_BENCHMARK = {
+    "Housing & Utilities": 30,
+    "Transport": 20,
+    "Food & Non-Alcoholic Beverages": 18,
+    "Education": 5,
+    "Health": 5,
+    "Recreation & Culture": 7,
+    "Misc": 10,
+    "Savings": 5
+  };
+
+  // Setup Chart.js with initial empty data
+  const ctx = document.getElementById('comparisonChart').getContext('2d');
+  let chart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Expenses', 'Savings'],
+      datasets: [{
+        label: 'Your split',
+        data: [1, 0],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+
+  const form = document.getElementById('financeForm');
+  const output = document.getElementById('output');
+  const savingsNum = document.getElementById('savingsNum');
+  const savingsPct = document.getElementById('savingsPct');
+  const adviceList = document.getElementById('adviceList');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const income = parseFloat(document.getElementById('income').value || 0);
+    const expenses = parseFloat(document.getElementById('expenses').value || 0);
+
+    // Basic client-side validation
+    if (isNaN(income) || isNaN(expenses) || income <= 0) {
+      alert("Please enter a valid positive income and expenses.");
+      return;
+    }
+
+    // Call backend API
+    try {
+      const resp = await fetch("http://127.0.0.1:8000/recommend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ income: income, expenses: expenses })
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error("API error: " + text);
+      }
+
+      const data = await resp.json();
+      // Show results
+      output.style.display = 'block';
+      savingsNum.textContent = data.savings;
+      savingsPct.textContent = data.savings_percent + "%";
+
+      const ul = document.createElement('ul');
+      ul.innerHTML = data.advice.map(a => `<li>${a}</li>`).join('');
+      adviceList.innerHTML = "<strong>Advice:</strong>";
+      adviceList.appendChild(ul);
+
+      // Update chart: user Expenses vs Savings
+      chart.data.labels = ['Expenses', 'Savings'];
+      chart.data.datasets[0].data = [data.expenses, data.savings > 0 ? data.savings : 0.0001]; // avoid 0/0
+      chart.update();
+
+      // OPTIONAL: Show SA benchmark in console (or could make a small second chart)
+      console.log("SA benchmark (approx %):", SA_BENCHMARK);
+
+    } catch (err) {
+      alert("Failed to call backend: " + err.message);
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>

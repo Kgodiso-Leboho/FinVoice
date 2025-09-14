@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spending Summary - FinVoice</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0b1a22;
+      padding: 20px;
+    }
+    .card {
+      color: #111;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      margin-top: 20px;
+      border: #ffffff solid 2px;
+      color: gold;
+    }
+    .input-area {
+      margin: 20px 0;
+      display: flex;
+      gap: 10px;
+    }
+    .input-area input, .input-area select {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    .input-area button {
+      background: #FFD700;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .advice {
+      margin-top: 15px;
+      padding: 15px;
+      background: #fef9c3;
+      border-left: 5px solid #FFD700;
+      border-radius: 8px;
+      color: #09161d;
+    }
+    canvas {
+      margin-top: 20px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="assistant-container">
+    <div class="header">
+      <span>Spending Summary</span>
+      <a href="index.html" class="back-btn">⬅ Back</a>
+    </div>
+
+    <div class="card">
+      <h2>This Month's Spending</h2>
+      <p id="month-total">Total: R0</p>
+      <p id="today-total">Today: R0</p>
+      <!-- Income Input (shown only once at the start of month) -->
+    <div id="income-section">
+    <input type="number" id="income-input" placeholder="Enter your monthly income">
+    <button onclick="setIncome()">Set Income</button>
+    </div>
+
+
+      <!-- Add spending input -->
+      <div class="input-area">
+        <input type="number" id="spend-input" placeholder="Enter amount (R)">
+        <select id="category-input">
+          <option value="">Select Category</option>
+          <option value="Food">Food</option>
+          <option value="Transport">Transport</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Bills">Bills</option>
+          <option value="Other">Other</option>
+        </select>
+        <button onclick="addSpending()">Add</button>
+      </div>
+
+      <!-- Advice Section -->
+      <div class="advice" id="advice-box">
+        💡 Tip: Enter your expenses to get personalized advice.
+      </div>
+
+      <!-- Recommendation Button -->
+      <button style="margin-top: 10px;" onclick="showRecommendations()">Get Recommendations</button>
+
+      <!-- Chart -->
+      <canvas id="spendingChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    let income = parseFloat(localStorage.getItem("income")) || 0;
+    let today = parseFloat(localStorage.getItem("today")) || 0;
+    let month = parseFloat(localStorage.getItem("month")) || 0;
+    let expenditures = JSON.parse(localStorage.getItem("expenditures")) || {};
+    let savedAmount = parseFloat(localStorage.getItem("savedAmount")) || 0;
+    let goalAmount = parseFloat(localStorage.getItem("goalAmount")) || 0;
+
+    // Set Income
+    function setIncome() {
+    const value = parseFloat(document.getElementById("income-input").value);
+    if (value > 0) {
+        income = value;
+        localStorage.setItem("income", income);
+        document.getElementById("income-section").style.display = "none";
+        alert("Monthly income set to R" + income);
+    } else alert("Please enter a valid income.");
+    }
+
+    // Add Spending
+    function addSpending() {
+    const value = parseFloat(document.getElementById("spend-input").value);
+    const category = document.getElementById("category-input").value;
+    if (!value || !category) { alert("Enter amount and category."); return; }
+
+    today += value;
+    month += value;
+    expenditures[category] = (expenditures[category] || 0) + value;
+
+    localStorage.setItem("today", today);
+    localStorage.setItem("month", month);
+    localStorage.setItem("expenditures", JSON.stringify(expenditures));
+
+    document.getElementById("today-total").innerText = "Today: R" + today;
+    document.getElementById("month-total").innerText = "Total: R" + month;
+
+    // Update remaining balance
+    const remainingBalance = income - month;
+    localStorage.setItem("balance", remainingBalance);
+
+    giveAdvice();
+    updateChart();
+
+    document.getElementById("spend-input").value = "";
+    document.getElementById("category-input").value = "";
+    }
+
+    // Advice logic
+    function giveAdvice() {
+    const adviceBox = document.getElementById("advice-box");
+    let adviceText = "✅ Great job! Keep tracking your expenses.";
+
+    for (const [cat, amt] of Object.entries(expenditures)) {
+        if (cat === "Food" && amt > 200) adviceText = "⚠️ High Food spending. Consider cooking at home more.";
+        if (cat === "Shopping" && amt > 300) adviceText = "⚠️ Shopping expenses are high. Review purchases.";
+        if (cat === "Entertainment" && amt > 150) adviceText = "⚠️ Entertainment spending is high. Try free activities.";
+    }
+
+    adviceBox.innerText = adviceText;
+    }
+
+    // Recommendations
+    function showRecommendations() {
+    let recText = "Recommendations:\n";
+    for (const [cat, amt] of Object.entries(expenditures)) {
+        if (cat === "Food" && amt > 200) recText += "- Reduce eating out.\n";
+        if (cat === "Shopping" && amt > 300) recText += "- Limit online shopping.\n";
+        if (cat === "Entertainment" && amt > 150) recText += "- Consider low-cost activities.\n";
+        if (cat === "Transport" && amt > 100) recText += "- Use public transport or carpool.\n";
+        if (cat === "Bills" && amt > 500) recText += "- Review subscriptions and utilities.\n";
+    }
+    if (recText === "Recommendations:\n") recText += "- Spending under control. Keep it up!";
+    alert(recText);
+    }
+
+    // Chart.js
+    const ctx = document.getElementById('spendingChart').getContext('2d');
+    const chart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: Object.keys(expenditures), datasets: [{ label:'Expenditure by Category (R)', data:Object.values(expenditures), backgroundColor:'#FFD700' }] },
+    options: { responsive:true, scales:{y:{beginAtZero:true}} }
+    });
+    function updateChart() {
+    chart.data.labels = Object.keys(expenditures);
+    chart.data.datasets[0].data = Object.values(expenditures);
+    chart.update();
+    }
+
+    // Initialize chart and advice on page load
+    updateChart();
+    giveAdvice();
+
+    // ----------------- Fetch financial advice from FastAPI -----------------
+    async function fetchAdvice() {
+    const userData = {
+        income: income,
+        expenses: month,
+        savings: savedAmount,
+        debt: 0,
+        age: 30,
+        dependents: 1,
+        risk_profile: "medium",
+        context: "spending"
+    };
+
+    try {
+        const res = await fetch("http://127.0.0.1:8000/get-advice", {
+        method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(userData)
+        });
+        const data = await res.json();
+        const adviceDiv = document.getElementById("advice-box");
+        adviceDiv.innerHTML = "<strong>Advice:</strong><br>";
+        data.financial_advice.forEach((a,i)=>{adviceDiv.innerHTML+=`${i+1}. ${a}<br>`});
+        if(data.trust_advice.length>0){
+        adviceDiv.innerHTML+="<br><strong>Trust Advice:</strong><br>";
+        data.trust_advice.forEach((a,i)=>{adviceDiv.innerHTML+=`${i+1}. ${a}<br>`});
+        }
+    } catch(e){
+        console.error(e);
+        document.getElementById("advice-box").innerText="Failed to load advice.";
+    }
+    }
+    fetchAdvice();
+
+    </script>
+</body>
+</html>

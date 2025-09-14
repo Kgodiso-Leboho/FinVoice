@@ -1,0 +1,181 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0b1a22;
+}
+
+h1 {
+    color: gold;
+    text-align: center;
+    margin-top: 20px;
+}
+
+input {
+    width: 90%;
+    height: 20px;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 16px;
+    background-color: #061015;
+    color: white;
+    font-size: 16px;
+}
+
+/* Placeholder styling + smooth fade */
+input::placeholder {
+    color: #888;
+    opacity: 1; /* Firefox */
+    transition: color 0.3s ease;
+}
+
+input:focus::placeholder {
+    color: transparent;
+}
+
+/* Highlight input on focus */
+input:focus {
+    outline: none;
+    border: 1px solid gold;
+    box-shadow: 0 0 8px gold;
+}
+
+.input-container {
+    width: 400px;
+    height: 350px;
+    padding: 20px;
+    background-color: #09161d;
+    border-radius: 16px;
+    box-shadow: 10px 0px 10px 0px rgba(0.1, 0.1, 0.1, 0.1);
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: #ffffff solid 2px;
+}
+
+.input-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ffffff;
+    color: black;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: gold;
+    color: white;
+    transform: scale(1.05); /* subtle zoom effect */
+}
+
+.email, .password, .name {
+    position: relative;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.email i, .password i, .name i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+
+.email input, .password input, .name input {
+    padding-left: 30px; /* space so text doesn't overlap icon */
+    height: 30px;
+    font-size: 16px;
+}
+
+.forgot {
+    text-align: right;
+    margin-top: 10px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.forgot a {
+    color: gold;
+    text-decoration: none;
+}
+
+.forgot a:hover {
+    text-decoration: underline;
+}
+
+.register-link {
+    text-align: left;
+    margin-top: 15px;
+    color: #ffffff;
+    font: 1em sans-serif;
+    font-weight: bold;
+}
+
+.register-link a {
+    color: gold;
+    text-decoration: none;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+.input-container2 {
+    width: 400px;
+    height: 200px;
+    padding: 20px;
+    background-color: #09161d;
+    border-radius: 16px;
+    box-shadow: 10px 0px 10px 0px rgba(0.1, 0.1, 0.1, 0.1);
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+     border: #ffffff solid 2px;
+}
+
+.input-container2 h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-container3 {
+    width: 400px;
+    height: 450px;
+    padding: 20px;
+    background-color: #09161d;
+    border-radius: 16px;
+    box-shadow: 10px 0px 10px 0px rgba(0.1, 0.1, 0.1, 0.1);
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: #ffffff solid 2px;
+}
+
+.input-container3 h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.action-cards {
+    display: inline-block;
+    vertical-align: top; /* keeps them aligned */
+    margin-right: 10px; /* spacing */
+    justify-content: space-around;
+}

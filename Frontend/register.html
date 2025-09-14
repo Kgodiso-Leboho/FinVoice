@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register - FinVoice</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="input-container3">
+    <div class="header">
+        <h2>Create an Account</h2>
+    </div>
+
+    <div class="name">
+        <i class="fa-solid fa-user"></i>
+        <input type="text" placeholder="| Full Name" id="fullname" required>
+    </div>
+
+    <div class="email">
+        <i class="fa-solid fa-envelope"></i>
+        <input type="email" placeholder="| Email address" id="email" required>
+    </div>
+
+    <div class="password">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" placeholder="| Password" id="password" required>
+    </div>
+
+    <div class="password">
+        <i class="fa-solid fa-lock"></i>
+        <input type="password" placeholder="| Confirm Password" id="confirmPassword" required>
+    </div>
+
+    <div class="button">
+        <button id="registerBtn">Create an account</button>
+    </div>
+
+    <div class="login-link">
+        <p>Already have an account? <a href="login.html">Log in</a></p>
+    </div>
+
+    <div class="message" id="msg"></div>
+</div>
+
+<script>
+const registerBtn = document.getElementById("registerBtn");
+const fullname = document.getElementById("fullname");
+const email = document.getElementById("email");
+const password = document.getElementById("password");
+const confirmPassword = document.getElementById("confirmPassword");
+const msg = document.getElementById("msg");
+
+registerBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // prevent form submission
+
+    const nameVal = fullname.value.trim();
+    const emailVal = email.value.trim();
+    const pwdVal = password.value.trim();
+    const confirmVal = confirmPassword.value.trim();
+
+    if (!nameVal || !emailVal || !pwdVal || !confirmVal) {
+        msg.style.color = "red";
+        msg.innerText = "Please fill in all fields.";
+        return;
+    }
+
+    if (pwdVal !== confirmVal) {
+        msg.style.color = "red";
+        msg.innerText = "Passwords do not match.";
+        return;
+    }
+
+    // Retrieve existing users or initialize empty array
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+
+    // Check if email already exists
+    if (users.some(u => u.email === emailVal)) {
+        msg.style.color = "red";
+        msg.innerText = "Email already registered. Please login.";
+        return;
+    }
+
+    // Add new user
+    users.push({ fullname: nameVal, email: emailVal, password: pwdVal });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    msg.style.color = "green";
+    msg.innerText = "Registration successful! Redirecting to login...";
+
+    setTimeout(() => window.location.href = "login.html", 1500);
+});
+</script>
+</body>
+</html>
